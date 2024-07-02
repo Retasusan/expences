@@ -1,112 +1,132 @@
-import Image from "next/image";
+"use client";
+import { useState, useEffect } from "react";
 
 export default function Home() {
+  const [newPayment, setNewPayment] = useState(0);
+  let [summary, setSummary] = useState(0);
+
+  const date = new Date();
+  const year = date.getFullYear();
+  const month = date.getMonth() + 1;
+  const day = date.getDate();
+  const hour = date.getHours();
+  const minute = date.getMinutes();
+  const second = date.getSeconds();
+
+  const [newDate, setNewDate] = useState(
+    `${year}/${month}/${day}/${hour}:${minute}.${second}`
+  );
+
+  const paymentChange = (e: any) => setNewPayment(e.target.value);
+  const dateChange = (e: any) => setNewDate(e.target.value);
+
+  const [payments, setPayments] = useState([
+    {
+      id: "null",
+      date: "null",
+      payment: 0,
+    },
+  ]);
+
+  const addPayment = () => {
+    const date = new Date();
+    const year = date.getFullYear();
+    const month = date.getMonth() + 1;
+    const day = date.getDate();
+    const hour = date.getHours();
+    const minute = date.getMinutes();
+    const second = date.getSeconds();
+    setNewDate(`${year}/${month}/${day}/${hour}:${minute}.${second}`);
+    if (newPayment === undefined || Number(newPayment) <= 0) return;
+    const newPaymentItem = {
+      id: new Date().getTime().toString(),
+      date: newDate,
+      payment: newPayment,
+    };
+    summary += Number(newPayment);
+    setSummary(summary);
+    setPayments([...payments, newPaymentItem]);
+    setNewPayment(0);
+  };
+
+  useEffect(() => {
+    const savedPayments = localStorage.getItem("pay");
+    if (savedPayments && savedPayments.length > 0) {
+      setPayments(JSON.parse(savedPayments));
+    }
+  }, []);
+
+  useEffect(() => {
+    if (payments.length > 0 && payments[0].id === "null") {
+      const savedPayments = localStorage.getItem("pay");
+      if (savedPayments && savedPayments.length > 0) {
+        setPayments(JSON.parse(savedPayments));
+        return;
+      }
+      setPayments([]);
+      return;
+    }
+
+    localStorage.setItem("pay", JSON.stringify(payments));
+  }, [payments]);
+
   return (
-    <main className="flex min-h-screen flex-col items-center justify-between p-24">
-      <div className="z-10 w-full max-w-5xl items-center justify-between font-mono text-sm lg:flex">
-        <p className="fixed left-0 top-0 flex w-full justify-center border-b border-gray-300 bg-gradient-to-b from-zinc-200 pb-6 pt-8 backdrop-blur-2xl dark:border-neutral-800 dark:bg-zinc-800/30 dark:from-inherit lg:static lg:w-auto  lg:rounded-xl lg:border lg:bg-gray-200 lg:p-4 lg:dark:bg-zinc-800/30">
-          Get started by editing&nbsp;
-          <code className="font-mono font-bold">src/app/page.tsx</code>
-        </p>
-        <div className="fixed bottom-0 left-0 flex h-48 w-full items-end justify-center bg-gradient-to-t from-white via-white dark:from-black dark:via-black lg:static lg:size-auto lg:bg-none">
-          <a
-            className="pointer-events-none flex place-items-center gap-2 p-8 lg:pointer-events-auto lg:p-0"
-            href="https://vercel.com?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            By{" "}
-            <Image
-              src="/vercel.svg"
-              alt="Vercel Logo"
-              className="dark:invert"
-              width={100}
-              height={24}
-              priority
-            />
-          </a>
-        </div>
-      </div>
-
-      <div className="relative z-[-1] flex place-items-center before:absolute before:h-[300px] before:w-full before:-translate-x-1/2 before:rounded-full before:bg-gradient-radial before:from-white before:to-transparent before:blur-2xl before:content-[''] after:absolute after:-z-20 after:h-[180px] after:w-full after:translate-x-1/3 after:bg-gradient-conic after:from-sky-200 after:via-blue-200 after:blur-2xl after:content-[''] before:dark:bg-gradient-to-br before:dark:from-transparent before:dark:to-blue-700 before:dark:opacity-10 after:dark:from-sky-900 after:dark:via-[#0141ff] after:dark:opacity-40 sm:before:w-[480px] sm:after:w-[240px] before:lg:h-[360px]">
-        <Image
-          className="relative dark:drop-shadow-[0_0_0.3rem_#ffffff70] dark:invert"
-          src="/next.svg"
-          alt="Next.js Logo"
-          width={180}
-          height={37}
-          priority
+    <main className="min-h-screen bg-gray-100 py-10">
+      <h1 className="text-4xl font-bold text-center text-teal-600 mb-10">
+        家計簿アプリ
+      </h1>
+      <div className="flex justify-center mb-10">
+        <input
+          type="date"
+          className="mr-5 p-2 border rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-teal-400"
+          onChange={dateChange}
         />
+        <input
+          type="number"
+          placeholder="payment"
+          className="text-black h-8 border-2 border-gray-400 rounded-md shadow-sm p-2 focus:outline-none focus:ring-2 focus:ring-teal-400"
+          onChange={paymentChange}
+          value={newPayment}
+        />
+        <button
+          className="bg-teal-500 text-white rounded-md shadow-md w-20 ml-5 p-2 hover:bg-teal-600 transition"
+          onClick={addPayment}
+        >
+          Submit
+        </button>
       </div>
-
-      <div className="mb-32 grid text-center lg:mb-0 lg:w-full lg:max-w-5xl lg:grid-cols-4 lg:text-left">
-        <a
-          href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          className="group rounded-lg border border-transparent px-5 py-4 transition-colors hover:border-gray-300 hover:bg-gray-100 hover:dark:border-neutral-700 hover:dark:bg-neutral-800/30"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2 className="mb-3 text-2xl font-semibold">
-            Docs{" "}
-            <span className="inline-block transition-transform group-hover:translate-x-1 motion-reduce:transform-none">
-              -&gt;
-            </span>
-          </h2>
-          <p className="m-0 max-w-[30ch] text-sm opacity-50">
-            Find in-depth information about Next.js features and API.
-          </p>
-        </a>
-
-        <a
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          className="group rounded-lg border border-transparent px-5 py-4 transition-colors hover:border-gray-300 hover:bg-gray-100 hover:dark:border-neutral-700 hover:dark:bg-neutral-800/30"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2 className="mb-3 text-2xl font-semibold">
-            Learn{" "}
-            <span className="inline-block transition-transform group-hover:translate-x-1 motion-reduce:transform-none">
-              -&gt;
-            </span>
-          </h2>
-          <p className="m-0 max-w-[30ch] text-sm opacity-50">
-            Learn about Next.js in an interactive course with&nbsp;quizzes!
-          </p>
-        </a>
-
-        <a
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          className="group rounded-lg border border-transparent px-5 py-4 transition-colors hover:border-gray-300 hover:bg-gray-100 hover:dark:border-neutral-700 hover:dark:bg-neutral-800/30"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2 className="mb-3 text-2xl font-semibold">
-            Templates{" "}
-            <span className="inline-block transition-transform group-hover:translate-x-1 motion-reduce:transform-none">
-              -&gt;
-            </span>
-          </h2>
-          <p className="m-0 max-w-[30ch] text-sm opacity-50">
-            Explore starter templates for Next.js.
-          </p>
-        </a>
-
-        <a
-          href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          className="group rounded-lg border border-transparent px-5 py-4 transition-colors hover:border-gray-300 hover:bg-gray-100 hover:dark:border-neutral-700 hover:dark:bg-neutral-800/30"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2 className="mb-3 text-2xl font-semibold">
-            Deploy{" "}
-            <span className="inline-block transition-transform group-hover:translate-x-1 motion-reduce:transform-none">
-              -&gt;
-            </span>
-          </h2>
-          <p className="m-0 max-w-[30ch] text-balance text-sm opacity-50">
-            Instantly deploy your Next.js site to a shareable URL with Vercel.
-          </p>
-        </a>
+      <div className="flex justify-center">
+        <table className="border-collapse border-2 border-gray-400 w-4/5 shadow-lg rounded-lg">
+          <caption className="mb-5 text-lg font-semibold">
+            Expenses Table
+          </caption>
+          <thead className="w-full text-center bg-yellow-300">
+            <tr>
+              <th scope="col" className="border-2 border-gray-400 w-1/5 p-2">
+                Date
+              </th>
+              <th scope="col" className="border-2 border-gray-400 w-2/5 p-2">
+                Payment
+              </th>
+            </tr>
+          </thead>
+          <tbody className="border-gray-400">
+            {payments.map((item, index) =>
+              item.id !== "null" ? (
+                <tr key={item.id} className="border-gray-400">
+                  <td className="border-2 border-gray-400 p-2">{item.date}</td>
+                  <td className="border-2 border-gray-400 p-2">
+                    {item.payment}
+                  </td>
+                </tr>
+              ) : null
+            )}
+            <tr className="bg-green-400">
+              <td className="border-2 border-gray-400 p-2">Total</td>
+              <td className="border-2 border-gray-400 p-2">{summary}</td>
+            </tr>
+          </tbody>
+        </table>
       </div>
     </main>
   );
